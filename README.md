@@ -27,6 +27,21 @@ Output jars are in:
 
 - `paper-server/build/libs/`
 
+## Production Release Build
+
+Use this for release-ready metadata and artifact naming:
+
+```powershell
+.\gradlew.bat applyPatches
+$env:BUILD_NUMBER="1"
+$env:BUILD_STARTED_AT=(Get-Date).ToUniversalTime().ToString("o")
+.\gradlew.bat :paper-server:createReleasePaperclipJar
+```
+
+Release artifact:
+
+- `paper-server/build/libs/paperclip-<version>-mojmap.jar`
+
 Debug/advanced alternatives:
 
 - `createMojmapBundlerJar`
