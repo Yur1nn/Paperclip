@@ -343,11 +343,24 @@ class PaperPluginInstanceManager {
 
         for (final Appender appender : context.getConfiguration().getAppenders().values()) {
             if (appender instanceof AsyncAppender asyncAppender) {
-                final boolean flushed = asyncAppender.flush(100, TimeUnit.MILLISECONDS);
+                final boolean flushed = tryFlush(asyncAppender);
                 if (!flushed) {
                     this.server.getLogger().log(Level.WARNING, "Failed to flush log messages before plugin unload.");
                 }
             }
+        }
+    }
+
+    private static boolean tryFlush(final AsyncAppender asyncAppender) {
+        try {
+            final java.lang.reflect.Method flush = asyncAppender.getClass().getMethod("flush", long.class, TimeUnit.class);
+            final Object flushed = flush.invoke(asyncAppender, 100L, TimeUnit.MILLISECONDS);
+            return flushed instanceof Boolean ? (Boolean) flushed : true;
+        } catch (final NoSuchMethodException ignored) {
+            // Some Log4j variants do not expose AsyncAppender#flush(timeout, unit).
+            return true;
+        } catch (final ReflectiveOperationException ex) {
+            return false;
         }
     }
 
