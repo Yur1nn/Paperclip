@@ -97,14 +97,20 @@
 +            org.spigotmc.SpigotConfig.disabledAdvancements = spigotConfiguration.getStringList("advancements.disabled"); // Paper - fix SPIGOT-5885, must be set early in init
 +
 +            // Paper start - fix SPIGOT-5824
-+            File file;
-+            File userCacheFile = new File(Services.USERID_CACHE_FILE);
++            File serverRoot;
++            File userCacheFile = new File(new File("data"), Services.USERID_CACHE_FILE);
 +            if (optionSet.has("universe")) {
-+                file = (File) optionSet.valueOf("universe"); // CraftBukkit
-+                userCacheFile = new File(file, Services.USERID_CACHE_FILE);
++                serverRoot = (File) optionSet.valueOf("universe"); // CraftBukkit
++                userCacheFile = new File(new File(serverRoot, "data"), Services.USERID_CACHE_FILE);
 +            } else {
-+                file = new File(bukkitConfiguration.getString("settings.world-container", "."));
++                serverRoot = new File(bukkitConfiguration.getString("settings.world-container", "."));
 +            }
++            File userCacheParent = userCacheFile.getParentFile();
++            if (userCacheParent != null && !userCacheParent.exists()) {
++                userCacheParent.mkdirs();
++            }
++            // Keep world-container override isolated to this bootstrap resolution point for easy upstream merges.
++            File file = org.bukkit.craftbukkit.settings.WorldsDirectoryManager.resolveWorldsContainer(serverRoot);
 +            // Paper end - fix SPIGOT-5824
 +            Services services = Services.create(new com.destroystokyo.paper.profile.PaperAuthenticationService(Proxy.NO_PROXY), file, userCacheFile, optionSet); // Paper - pass OptionSet to load paper config files; override authentication service; fix world-container
 +            // CraftBukkit start

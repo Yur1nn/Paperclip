@@ -1122,6 +1122,18 @@ public final class CraftServer implements Server {
     @SuppressWarnings({ "unchecked", "finally" })
     private void loadCustomPermissions() {
         File file = new File(this.configuration.getString("settings.permissions-file"));
+        if (!file.isAbsolute()) {
+            final File bukkitConfigParent = this.getConfigFile().getParentFile();
+            if (bukkitConfigParent != null) {
+                file = new File(bukkitConfigParent, file.getPath());
+            }
+        }
+        if (!file.exists() && "permissions.yml".equals(this.configuration.getString("settings.permissions-file"))) {
+            final File bukkitConfigParent = this.getConfigFile().getParentFile();
+            if (bukkitConfigParent != null) {
+                file = new File(bukkitConfigParent, "server-permissions.yml");
+            }
+        }
         FileInputStream stream;
 
         try {

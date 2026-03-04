@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import joptsimple.OptionParser;
@@ -22,6 +23,38 @@ public class Main {
     // Paper end - Reset loggers after shutdown
 
     public static void main(String[] args) {
+        ensureDirectoryExists(new File("config"));
+        ensureDirectoryExists(new File("data"));
+        migrateLegacyFile(new File("bukkit.yml"), new File("config", "server.yml"));
+        migrateLegacyFile(new File("commands.yml"), new File("config", "server-commands.yml"));
+        migrateLegacyFile(new File("spigot.yml"), new File("config", "global-spigot.yml"));
+        migrateLegacyFile(new File("paper.yml"), new File("config", "global-paper.yml"));
+        migrateLegacyFile(new File("help.yml"), new File("config", "server-help.yml"));
+        migrateLegacyFile(new File("permissions.yml"), new File("config", "server-permissions.yml"));
+        migrateLegacyFile(new File("config", "bukkit.yml"), new File("config", "server.yml"));
+        migrateLegacyFile(new File("config", "commands.yml"), new File("config", "server-commands.yml"));
+        migrateLegacyFile(new File("config", "permissions.yml"), new File("config", "server-permissions.yml"));
+        migrateLegacyFile(new File("config", "help.yml"), new File("config", "server-help.yml"));
+        migrateLegacyFile(new File("config", "spigot.yml"), new File("config", "global-spigot.yml"));
+        migrateLegacyFile(new File("config", "paper.yml"), new File("config", "global-paper.yml"));
+        migrateLegacyFile(new File("config/server", "bukkit.yml"), new File("config", "server.yml"));
+        migrateLegacyFile(new File("config/server", "commands.yml"), new File("config", "server-commands.yml"));
+        migrateLegacyFile(new File("config/server", "permissions.yml"), new File("config", "server-permissions.yml"));
+        migrateLegacyFile(new File("config/server", "help.yml"), new File("config", "server-help.yml"));
+        migrateLegacyFile(new File("config/global", "spigot.yml"), new File("config", "global-spigot.yml"));
+        migrateLegacyFile(new File("config/global", "paper.yml"), new File("config", "global-paper.yml"));
+        migrateLegacyFile(new File("config/core", "bukkit.yml"), new File("config", "server.yml"));
+        migrateLegacyFile(new File("config/core", "commands.yml"), new File("config", "server-commands.yml"));
+        migrateLegacyFile(new File("config/core", "permissions.yml"), new File("config", "server-permissions.yml"));
+        migrateLegacyFile(new File("config/help", "help.yml"), new File("config", "server-help.yml"));
+        migrateLegacyFile(new File("config/spigot", "spigot.yml"), new File("config", "global-spigot.yml"));
+        migrateLegacyFile(new File("config/paper", "paper.yml"), new File("config", "global-paper.yml"));
+        migrateLegacyFile(new File("usercache.json"), new File("data", "usercache.json"));
+        migrateLegacyFile(new File("version_history.json"), new File("data", "version_history.json"));
+        migrateLegacyFile(new File("banned-players.json"), new File("data", "banned-players.json"));
+        migrateLegacyFile(new File("banned-ips.json"), new File("data", "banned-ips.json"));
+        migrateLegacyFile(new File("ops.json"), new File("data", "ops.json"));
+        migrateLegacyFile(new File("whitelist.json"), new File("data", "whitelist.json"));
         if (System.getProperty("jdk.nio.maxCachedBufferSize") == null) System.setProperty("jdk.nio.maxCachedBufferSize", "262144"); // Paper - cap per-thread NIO cache size; https://www.evanjones.ca/java-bytebuffer-leak.html
         OptionParser parser = new OptionParser() {
             {
@@ -82,13 +115,13 @@ public class Main {
                 this.acceptsAll(asList("b", "bukkit-settings"), "File for bukkit settings")
                         .withRequiredArg()
                         .ofType(File.class)
-                        .defaultsTo(new File("bukkit.yml"))
+                        .defaultsTo(new File("config", "server.yml"))
                         .describedAs("Yml file");
 
                 this.acceptsAll(asList("C", "commands-settings"), "File for command settings")
                         .withRequiredArg()
                         .ofType(File.class)
-                        .defaultsTo(new File("commands.yml"))
+                        .defaultsTo(new File("config", "server-commands.yml"))
                         .describedAs("Yml file");
 
                 this.accepts("forceUpgrade", "Whether to force a world upgrade");
@@ -112,7 +145,7 @@ public class Main {
                 this.acceptsAll(asList("S", "spigot-settings"), "File for spigot settings")
                         .withRequiredArg()
                         .ofType(File.class)
-                        .defaultsTo(new File("spigot.yml"))
+                        .defaultsTo(new File("config", "global-spigot.yml"))
                         .describedAs("Yml file");
 
                 this.acceptsAll(asList("paper-dir", "paper-settings-directory"), "Directory for Paper settings")
@@ -124,7 +157,7 @@ public class Main {
                 this.acceptsAll(asList("paper", "paper-settings"), "File for Paper settings")
                         .withRequiredArg()
                         .ofType(File.class)
-                        .defaultsTo(new File("paper.yml"))
+                        .defaultsTo(new File("config", "global-paper.yml"))
                         .describedAs("Yml file");
 
                 this.acceptsAll(asList("add-plugin", "add-extra-plugin-jar"), "Specify paths to extra plugin jars to be loaded in addition to those in the plugins folder. This argument can be specified multiple times, once for each extra plugin jar path.")
@@ -205,6 +238,28 @@ public class Main {
             } catch (Throwable t) {
                 t.printStackTrace();
             }
+        }
+    }
+
+    private static void ensureDirectoryExists(final File directory) {
+        if (directory.exists() || directory.mkdirs()) {
+            return;
+        }
+        throw new IllegalStateException("Unable to create required directory: " + directory.getAbsolutePath());
+    }
+
+    private static void migrateLegacyFile(final File legacyFile, final File targetFile) {
+        if (!legacyFile.exists() || targetFile.exists()) {
+            return;
+        }
+        final File parent = targetFile.getParentFile();
+        if (parent != null) {
+            ensureDirectoryExists(parent);
+        }
+        try {
+            Files.move(legacyFile.toPath(), targetFile.toPath());
+        } catch (IOException ex) {
+            throw new IllegalStateException("Unable to migrate " + legacyFile.getAbsolutePath() + " to " + targetFile.getAbsolutePath(), ex);
         }
     }
 }
