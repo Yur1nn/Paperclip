@@ -43,6 +43,7 @@ public class PaperVersionFetcher implements VersionFetcher {
     private static final String DOWNLOAD_PAGE = "https://papermc.io/downloads/paper";
     private static final String REPOSITORY = "PaperMC/Paper";
     private static final ServerBuildInfo BUILD_INFO = ServerBuildInfo.buildInfo();
+    private static final boolean OFFICIAL_PAPER_DISTRIBUTION = "Paper".equalsIgnoreCase(BUILD_INFO.brandName());
     private static final String USER_AGENT = BUILD_INFO.brandName() + "/" + BUILD_INFO.asString(VERSION_SIMPLE) + " (https://papermc.io)";
     private static final Gson GSON = new Gson();
 
@@ -56,6 +57,9 @@ public class PaperVersionFetcher implements VersionFetcher {
         final Component updateMessage;
         if (BUILD_INFO.buildNumber().isEmpty() && BUILD_INFO.gitCommit().isEmpty()) {
             updateMessage = text("You are running a development version without access to version information", color(0xFF5300));
+        } else if (!OFFICIAL_PAPER_DISTRIBUTION) {
+            // TODO allow fork-specific update endpoints to be configured.
+            updateMessage = text("Version checking is unavailable for this custom fork", NamedTextColor.GRAY);
         } else {
             updateMessage = getUpdateStatusMessage();
         }
@@ -70,6 +74,8 @@ public class PaperVersionFetcher implements VersionFetcher {
         final OptionalInt buildNumber = BUILD_INFO.buildNumber();
         if (buildNumber.isEmpty() && BUILD_INFO.gitCommit().isEmpty()) {
             COMPONENT_LOGGER.warn(text("*** You are running a development version without access to version information ***"));
+        } else if (!OFFICIAL_PAPER_DISTRIBUTION) {
+            COMPONENT_LOGGER.info(text("*** Version checking is unavailable for this custom fork build ***"));
         } else {
             final Optional<MinecraftVersionFetcher> apiResult = fetchMinecraftVersionList();
             if (buildNumber.isPresent()) {
