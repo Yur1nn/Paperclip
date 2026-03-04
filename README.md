@@ -27,18 +27,20 @@ Output jars are in:
 
 - `paper-server/build/libs/`
 
-Useful alternatives:
+Debug/advanced alternatives:
 
-- `createReobfPaperclipJar`
 - `createMojmapBundlerJar`
-- `createReobfBundlerJar`
+
+`reobf` jar tasks are debug-only in paperweight 2.x and are not the supported release path.
+Use the `mojmap` variant for release builds.
 
 ## Development Run Tasks
 
 - `runPaperclip`
-- `runReobfPaperclip`
 - `runServer`
 - `runDevServer`
+
+`runReobfPaperclip` exists for debugging workflows only.
 
 Example:
 
