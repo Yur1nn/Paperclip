@@ -1,100 +1,87 @@
-Paper [![Paper Build Status](https://img.shields.io/github/actions/workflow/status/PaperMC/Paper/build.yml?branch=main)](https://github.com/PaperMC/Paper/actions)
-[![Discord](https://img.shields.io/discord/289587909051416579.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/papermc)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/papermc?label=GitHub%20Sponsors)](https://github.com/sponsors/PaperMC)
-[![Open Collective](https://img.shields.io/opencollective/all/papermc?label=OpenCollective%20Sponsors)](https://opencollective.com/papermc)
-===========
+# Paperclip
 
-The most widely used, high-performance Minecraft server that aims to fix gameplay and mechanics inconsistencies.
+Paperclip is a fork of Paper focused on a clean, maintainable customization layer while staying easy to update from upstream.
 
+## Requirements
 
-**Support and Project Discussion:**
-- [Our forums](https://forums.papermc.io/) or [Discord](https://discord.gg/papermc)
+- JDK 21
+- Internet connection (for dependencies and upstream artifacts)
 
-How To (Server Admins)
-------
-Paperclip is a jar file that you can download and run just like a normal jar file.
+## Build From Source
 
-Download Paper from our [downloads page](https://papermc.io/downloads/paper).
+From repository root:
 
-Run the Paperclip jar directly from your server. Just like old times
-
-* Documentation on using Paper: [docs.papermc.io](https://docs.papermc.io)
-* For a sneak peek at upcoming features, [see here](https://github.com/PaperMC/Paper/projects)
-
-How To (Plugin Developers)
-------
-* See our API [here](paper-api)
-* See upcoming, pending, and recently added API [here](https://github.com/orgs/PaperMC/projects/2/views/4)
-* Paper API javadocs here: [papermc.io/javadocs](https://papermc.io/javadocs/)
-#### Repository (for paper-api)
-##### Maven
-
-```xml
-<repository>
-    <id>papermc</id>
-    <url>https://repo.papermc.io/repository/maven-public/</url>
-</repository>
+```bash
+./gradlew applyPatches
+./gradlew createMojmapPaperclipJar
 ```
 
-```xml
-<dependency>
-    <groupId>io.papermc.paper</groupId>
-    <artifactId>paper-api</artifactId>
-    <version>1.21.11-R0.1-SNAPSHOT</version>
-    <scope>provided</scope>
-</dependency>
-```
-##### Gradle
-```kotlin
-repositories {
-    maven {
-        url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-}
+Windows PowerShell:
 
-dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-}
-
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
-}
+```powershell
+.\gradlew.bat applyPatches
+.\gradlew.bat createMojmapPaperclipJar
 ```
 
-How To (Compiling Jar From Source)
-------
-To compile Paper, you need JDK 21 and an internet connection.
+Output jars are in:
 
-Clone this repo, run `./gradlew applyPatches`, then `./gradlew createMojmapBundlerJar` from your terminal. You can find the compiled jar in the `paper-server/build/libs` directory.
+- `paper-server/build/libs/`
 
-To get a full list of tasks, run `./gradlew tasks`.
+Useful alternatives:
 
-How To (Pull Request)
-------
-See [Contributing](CONTRIBUTING.md)
+- `createReobfPaperclipJar`
+- `createMojmapBundlerJar`
+- `createReobfBundlerJar`
 
-Old Versions (1.21.3 and below)
-------
-For branches of versions 1.8-1.21.3, please see our [archive repository](https://github.com/PaperMC/Paper-archive).
+## Development Run Tasks
 
-Support Us
-------
-First of all, thank you for considering helping out, we really appreciate that!
+- `runPaperclip`
+- `runReobfPaperclip`
+- `runServer`
+- `runDevServer`
 
-PaperMC has various recurring expenses, mostly related to infrastructure. Paper uses [Open Collective](https://opencollective.com/) via the [Open Source Collective fiscal host](https://opencollective.com/opensource) to manage expenses. Open Collective allows us to be extremely transparent, so you can always see how your donations are used. You can read more about financially supporting PaperMC [on our website](https://papermc.io/sponsors).
+Example:
 
-You can find our collective [here](https://opencollective.com/papermc), or you can donate via GitHub Sponsors [here](https://github.com/sponsors/PaperMC), which will also go towards the collective.
+```powershell
+.\gradlew.bat runPaperclip
+```
 
-Special Thanks To:
--------------
+## Default Runtime Layout
 
-[![YourKit-Logo](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/)
+Paperclip uses organized runtime paths:
 
-[YourKit](https://www.yourkit.com/), makers of the outstanding java profiler, support open source projects of all kinds with their full featured [Java](https://www.yourkit.com/java/profiler) and [.NET](https://www.yourkit.com/.net/profiler) application profilers. We thank them for granting Paper an OSS license so that we can make our software the best it can be.
+- `config/` for YAML configuration files
+- `data/` for JSON/state files
+- `worlds/` as world container root
 
-[<img src="https://user-images.githubusercontent.com/21148213/121807008-8ffc6700-cc52-11eb-96a7-2f6f260f8fda.png" alt="" width="150">](https://www.jetbrains.com)
+Current default config files:
 
-[JetBrains](https://www.jetbrains.com/), creators of the IntelliJ IDEA, supports Paper with one of their [Open Source Licenses](https://www.jetbrains.com/opensource/). IntelliJ IDEA is the recommended IDE for working with Paper, and most of the Paper team uses it.
+- `config/server.yml`
+- `config/server-commands.yml`
+- `config/server-help.yml`
+- `config/server-permissions.yml`
+- `config/global-spigot.yml`
+- `config/global-paper.yml`
 
-All our sponsors!  
-[![Sponsor Image](https://raw.githubusercontent.com/PaperMC/papermc.io/data/sponsors.png)](https://papermc.io/sponsors)
+Current default data files:
+
+- `data/usercache.json`
+- `data/version_history.json`
+- `data/ops.json`
+- `data/whitelist.json`
+- `data/banned-players.json`
+- `data/banned-ips.json`
+
+## Plugin API
+
+This fork keeps Paper API compatibility targets unless explicitly changed in code.
+
+For API sources, see:
+
+- `paper-api/`
+
+## Contributing
+
+See:
+
+- `CONTRIBUTING.md`
