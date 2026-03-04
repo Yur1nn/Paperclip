@@ -356,16 +356,6 @@ tasks.registerRunTask("runReobfPaperclip") {
     mainClass.set(null as String?)
 }
 
-tasks.register<Copy>("createReleasePaperclipJar") {
-    group = "bundling"
-    description = "Create a release-ready Mojmap Paperclip jar with a clean file name"
-    val releaseFileName = "paperclip-${project.version}-mojmap.jar"
-    dependsOn(tasks.createMojmapPaperclipJar)
-    from(tasks.createMojmapPaperclipJar.flatMap { it.outputZip })
-    into(layout.buildDirectory.dir("libs"))
-    rename { releaseFileName }
-}
-
 fill {
     project("paper")
     versionFamily(paperweight.minecraftVersion.map { it.split(".", "-").takeWhile { part -> part.toIntOrNull() != null }.take(2).joinToString(".") })

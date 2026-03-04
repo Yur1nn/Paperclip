@@ -35,12 +35,12 @@ Use this for release-ready metadata and artifact naming:
 .\gradlew.bat applyPatches
 $env:BUILD_NUMBER="1"
 $env:BUILD_STARTED_AT=(Get-Date).ToUniversalTime().ToString("o")
-.\gradlew.bat :paper-server:createReleasePaperclipJar
+.\gradlew.bat createMojmapPaperclipJar
 ```
 
 Release artifact:
 
-- `paper-server/build/libs/paperclip-<version>-mojmap.jar`
+- `paper-server/build/libs/paper-paperclip-<version>-mojmap.jar`
 
 Debug/advanced alternatives:
 
