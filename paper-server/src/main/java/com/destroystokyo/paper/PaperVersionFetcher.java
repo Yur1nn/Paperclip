@@ -40,10 +40,14 @@ public class PaperVersionFetcher implements VersionFetcher {
     private static final ComponentLogger COMPONENT_LOGGER = ComponentLogger.logger(LogManager.getRootLogger().getName());
     private static final int DISTANCE_ERROR = -1;
     private static final int DISTANCE_UNKNOWN = -2;
-    private static final String DOWNLOAD_PAGE = "https://papermc.io/downloads/paper";
-    private static final String REPOSITORY = "PaperMC/Paper";
     private static final ServerBuildInfo BUILD_INFO = ServerBuildInfo.buildInfo();
     private static final boolean OFFICIAL_PAPER_DISTRIBUTION = "Paper".equalsIgnoreCase(BUILD_INFO.brandName());
+    private static final String REPOSITORY = OFFICIAL_PAPER_DISTRIBUTION
+        ? "PaperMC/Paper"
+        : System.getProperty("paperclip.version.repository", "Yur1nn/Paperclip");
+    private static final String DOWNLOAD_PAGE = OFFICIAL_PAPER_DISTRIBUTION
+        ? "https://papermc.io/downloads/paper"
+        : "https://github.com/" + REPOSITORY + "/releases";
     private static final String USER_AGENT = BUILD_INFO.brandName() + "/" + BUILD_INFO.asString(VERSION_SIMPLE) + " (https://papermc.io)";
     private static final Gson GSON = new Gson();
 
@@ -57,9 +61,6 @@ public class PaperVersionFetcher implements VersionFetcher {
         final Component updateMessage;
         if (BUILD_INFO.buildNumber().isEmpty() && BUILD_INFO.gitCommit().isEmpty()) {
             updateMessage = text("You are running a development version without access to version information", color(0xFF5300));
-        } else if (!OFFICIAL_PAPER_DISTRIBUTION) {
-            // TODO allow fork-specific update endpoints to be configured.
-            updateMessage = text("Version checking is unavailable for this custom fork", NamedTextColor.GRAY);
         } else {
             updateMessage = getUpdateStatusMessage();
         }
@@ -74,11 +75,9 @@ public class PaperVersionFetcher implements VersionFetcher {
         final OptionalInt buildNumber = BUILD_INFO.buildNumber();
         if (buildNumber.isEmpty() && BUILD_INFO.gitCommit().isEmpty()) {
             COMPONENT_LOGGER.warn(text("*** You are running a development version without access to version information ***"));
-        } else if (!OFFICIAL_PAPER_DISTRIBUTION) {
-            COMPONENT_LOGGER.info(text("*** Version checking is unavailable for this custom fork build ***"));
         } else {
-            final Optional<MinecraftVersionFetcher> apiResult = fetchMinecraftVersionList();
-            if (buildNumber.isPresent()) {
+            final Optional<MinecraftVersionFetcher> apiResult = OFFICIAL_PAPER_DISTRIBUTION ? fetchMinecraftVersionList() : Optional.empty();
+            if (OFFICIAL_PAPER_DISTRIBUTION && buildNumber.isPresent()) {
                 distance = fetchDistanceFromSiteApi(buildNumber.getAsInt());
             } else {
                 final Optional<String> gitBranch = BUILD_INFO.gitBranch();
@@ -116,7 +115,7 @@ public class PaperVersionFetcher implements VersionFetcher {
         int distance = DISTANCE_ERROR;
 
         final OptionalInt buildNumber = PaperVersionFetcher.BUILD_INFO.buildNumber();
-        if (buildNumber.isPresent()) {
+        if (OFFICIAL_PAPER_DISTRIBUTION && buildNumber.isPresent()) {
             distance = fetchDistanceFromSiteApi(buildNumber.getAsInt());
         } else {
             final Optional<String> gitBranch = PaperVersionFetcher.BUILD_INFO.gitBranch();
